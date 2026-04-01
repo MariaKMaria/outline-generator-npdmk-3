@@ -161,7 +161,6 @@ KEY NARRATIVE: No branches and a streamlined product lineup are features, not dr
 if "clients" not in st.session_state:
     st.session_state.clients = DEFAULT_CLIENTS.copy()
 else:
-    # Ensure new default clients are always present
     for name, data in DEFAULT_CLIENTS.items():
         if name not in st.session_state.clients:
             st.session_state.clients[name] = data
@@ -169,8 +168,33 @@ if "outline" not in st.session_state:
     st.session_state.outline = None
 if "generated_html" not in st.session_state:
     st.session_state.generated_html = None
+if "user_name" not in st.session_state:
+    st.session_state.user_name = None
+if "usage_log" not in st.session_state:
+    st.session_state.usage_log = []
 
 # ── Sidebar ──────────────────────────────────────────────────────────────────
+# ── Name gate ───────────────────────────────────────────────────────────────
+if not st.session_state.user_name:
+    st.markdown('''
+<div style="display:flex;align-items:center;justify-content:center;min-height:60vh;">
+  <div style="max-width:380px;width:100%;text-align:center;">
+''', unsafe_allow_html=True)
+    col_l, col_c, col_r = st.columns([1,2,1])
+    with col_c:
+        st.markdown(f'<img src="data:image/png;base64,{LOGO_B64}" height="40" style="margin-bottom:24px;">', unsafe_allow_html=True)
+        st.markdown('<div style="font-size:20px;font-weight:700;color:#1A1916;margin-bottom:8px;">Welcome</div>', unsafe_allow_html=True)
+        st.markdown('<div style="font-size:14px;color:#6B6760;margin-bottom:24px;">Please enter your name to continue</div>', unsafe_allow_html=True)
+        entered_name = st.text_input("Your name", placeholder="e.g. Maria K.", label_visibility="collapsed")
+        if st.button("Continue →", use_container_width=True):
+            if entered_name.strip():
+                st.session_state.user_name = entered_name.strip()
+                st.rerun()
+            else:
+                st.error("Please enter your name to continue.")
+    st.markdown('</div></div>', unsafe_allow_html=True)
+    st.stop()
+
 with st.sidebar:
     st.markdown(f"""
 <div style="padding: 24px 0 18px 0; border-bottom: 1px solid #2A2825; margin-bottom: 20px;">
@@ -205,6 +229,38 @@ with st.sidebar:
                 st.rerun()
             else:
                 st.warning("Name and brief required.")
+
+    st.markdown("---")
+    st.markdown('<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#6B6760;margin-bottom:8px;">Admin</div>', unsafe_allow_html=True)
+    with st.expander("View usage log"):
+        admin_pw = st.text_input("Admin password", type="password", key="admin_pw")
+        try:
+            correct_pw = st.secrets["ADMIN_PASSWORD"]
+        except:
+            correct_pw = "admin"
+        if admin_pw == correct_pw:
+            log = st.session_state.usage_log
+            if not log:
+                st.caption("No activity yet this session.")
+            else:
+                st.markdown(f"**{len(log)} generation(s) this session**")
+                for entry in reversed(log):
+                    st.markdown(f"""
+<div style="background:#1A1916;border-radius:6px;padding:10px 12px;margin-bottom:8px;font-size:12px;">
+  <div style="color:#E36C09;font-weight:600;">{entry['user']}</div>
+  <div style="color:#F0EDE8;margin:2px 0;">{entry['topic']}</div>
+  <div style="color:#9E9A94;">{entry['client']} · {entry['keyword']}</div>
+  <div style="color:#6B6760;font-size:11px;margin-top:4px;">{entry['timestamp']}</div>
+</div>
+""", unsafe_allow_html=True)
+        elif admin_pw:
+            st.error("Incorrect password.")
+
+    st.markdown("---")
+    st.markdown(f'<div style="font-size:11px;color:#6B6760;padding:4px 0;">Logged in as <strong style="color:#9E9A94;">{st.session_state.user_name}</strong></div>', unsafe_allow_html=True)
+    if st.button("Sign out", key="signout"):
+        st.session_state.user_name = None
+        st.rerun()
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 st.markdown('<div class="npd-tag">SEO + GEO</div>', unsafe_allow_html=True)
@@ -458,6 +514,14 @@ if generate_btn:
                 if result.get("success"):
                     st.session_state.doc_url = result["url"]
                     st.session_state.doc_title = doc_title
+                    from datetime import datetime
+                    st.session_state.usage_log.append({
+                        "user": st.session_state.user_name or "Unknown",
+                        "client": client_name or "No client",
+                        "topic": topic,
+                        "keyword": main_kw,
+                        "timestamp": datetime.now().strftime("%b %d %Y, %I:%M %p")
+                    })
                 else:
                     st.error(f"Google Docs error: {result.get('error')}")
                     st.stop()
