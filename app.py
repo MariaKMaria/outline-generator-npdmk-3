@@ -285,7 +285,45 @@ col3, col4 = st.columns(2)
 with col3:
     main_kw = st.text_input("Target keyword", placeholder="e.g. braked vs unbraked towing capacity")
 with col4:
-    notes = st.text_input("Notes (optional)", placeholder="e.g. focus on Outlander PHEV, include warranty link")
+    content_type = st.selectbox(
+        "Content type ✱",
+        ["— select —", "Blog post", "How-to guide", "Listicle", "Pillar page", "Comparison post", "Case study"],
+    )
+
+notes = st.text_input("Notes (optional)", placeholder="e.g. focus on Outlander PHEV, include warranty link")
+
+# File upload section
+example_text = None
+with st.expander("📎 Upload example outline (optional — .docx)"):
+    saved_examples = st.session_state.client_examples.get(selected_client, [])
+    if saved_examples:
+        st.markdown(f'<div style="font-size:12px;color:#6B6760;margin-bottom:8px;">{len(saved_examples)} saved example(s) for {selected_client}</div>', unsafe_allow_html=True)
+        use_saved = st.checkbox("Use saved example as reference", value=True)
+        if use_saved:
+            example_text = saved_examples[-1]["text"]
+            st.caption(f"Using: {saved_examples[-1]['name']}")
+    uploaded_file = st.file_uploader("Upload a new example outline", type=["docx"], label_visibility="collapsed")
+    if uploaded_file:
+        file_bytes = uploaded_file.read()
+        extracted = extract_docx_text(file_bytes)
+        example_text = extracted
+        st.success(f"Loaded: {uploaded_file.name}")
+        col_save, col_preview = st.columns(2)
+        with col_save:
+            if st.button("Save to client profile", key="save_example"):
+                if selected_client != "— no client —":
+                    if selected_client not in st.session_state.client_examples:
+                        st.session_state.client_examples[selected_client] = []
+                    st.session_state.client_examples[selected_client].append({
+                        "name": uploaded_file.name,
+                        "text": extracted
+                    })
+                    st.success(f"Saved to {selected_client} profile!")
+                else:
+                    st.warning("Select a client first to save.")
+        with col_preview:
+            if st.checkbox("Preview extracted text"):
+                st.text_area("", extracted[:600] + "...", height=150, disabled=True)
 
 if selected_client != "— no client —":
     client = st.session_state.clients[selected_client]
