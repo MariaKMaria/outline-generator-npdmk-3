@@ -298,8 +298,8 @@ def build_prompt(topic, main_kw, notes, client_name, client):
         # Condense brief to avoid token overflow
         brief = client['brief'].strip()
         brief_lines = brief.split('\n')
-        brief_condensed = '\n'.join(brief_lines[:30])  # first 30 lines max
-        brief_condensed = brief_condensed[:2000]  # hard cap at 2000 chars
+        brief_condensed = '\n'.join(brief_lines[:20])  # first 20 lines max
+        brief_condensed = brief_condensed[:1200]  # hard cap at 1200 chars
         client_section = f"\nCLIENT: {client_name}\nGUIDELINES:\n{brief_condensed}\n"
 
     notes_line = f"\nNOTES: {notes}" if notes else ""
@@ -328,11 +328,7 @@ Return ONLY this JSON:
   "peopleAlsoAsk": ["q1","q2","q3","q4","q5"],
   "serpFeatureType": "string",
   "serpFeaturePreview": "string",
-  "topRankingUrls": [
-    {{"url":"domain.com (homepage or known section only — no fabricated paths)","topKeyword":"kw","estTraffic":"2,000","wordCount":"1,800"}},
-    {{"url":"domain2.com","topKeyword":"kw","estTraffic":"1,200","wordCount":"2,100"}},
-    {{"url":"domain3.com","topKeyword":"kw","estTraffic":"800","wordCount":"1,500"}}
-  ],
+
   "introNote": "string",
   "proposedTitleTag": "string under 60 chars",
   "proposedMetaDescription": "string under 155 chars",
@@ -490,8 +486,8 @@ if generate_btn:
                 anthropic_client = anthropic.Anthropic(api_key=api_key)
                 message = anthropic_client.messages.create(
                     model="claude-haiku-4-5-20251001",
-                    max_tokens=6000,
-                    system="You are an expert SEO/GEO content strategist. Respond ONLY with valid JSON. No markdown, no backticks, no explanation before or after the JSON.",
+                    max_tokens=8000,
+                    system="You are an expert SEO/GEO content strategist. Respond ONLY with valid JSON. No markdown, no backticks, no explanation. Keep all string values concise (under 100 chars). You MUST complete the full JSON including all sections and closing braces.",
                     messages=[{"role": "user", "content": build_prompt(topic, main_kw, notes, client_name, client)}]
                 )
                 raw = message.content[0].text.strip()
