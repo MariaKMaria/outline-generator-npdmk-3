@@ -215,7 +215,7 @@ with st.sidebar:
 # ── Main ─────────────────────────────────────────────────────────────────────
 st.markdown('<div class="npd-tag">SEO + GEO</div>', unsafe_allow_html=True)
 st.markdown("## Blog Outline Generator")
-st.markdown('<p style="color:#9E9A94;font-size:14px;margin-top:-8px;margin-bottom:24px;">Select a client, enter a topic and keyword — Claude handles the rest.</p>', unsafe_allow_html=True)
+st.markdown('<p style="color:#6B6760;font-size:14px;margin-top:-8px;margin-bottom:24px;">Select a client, enter a topic and keyword — Claude handles the rest.</p>', unsafe_allow_html=True)
 
 col1, col2 = st.columns([1, 2])
 
