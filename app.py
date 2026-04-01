@@ -30,7 +30,10 @@ st.markdown("""
     text-transform: uppercase; letter-spacing: 0.07em; color: #6B6760 !important;
   }
   .stTextInput > div > div > input,
-  .stTextArea > div > div > textarea {
+  .stTextArea > div > div > textarea,
+  .stSelectbox > div > div > div,
+  [data-baseweb="select"] > div,
+  [data-baseweb="input"] > div {
     background: #111110 !important; border: 1px solid #2A2825 !important;
     border-radius: 6px !important; color: #F0EDE8 !important;
   }
@@ -38,6 +41,11 @@ st.markdown("""
   .stTextArea > div > div > textarea:focus {
     border-color: #E36C09 !important; box-shadow: none !important;
   }
+  [data-baseweb="select"] * { background: #111110 !important; color: #F0EDE8 !important; }
+  [data-baseweb="popover"] * { background: #1A1916 !important; color: #F0EDE8 !important; }
+  [data-baseweb="menu"] { background: #1A1916 !important; }
+  [data-baseweb="option"]:hover { background: #2A2825 !important; }
+  input::placeholder, textarea::placeholder { color: #4A4845 !important; }
   [data-testid="stSidebar"] h1,
   [data-testid="stSidebar"] h2,
   [data-testid="stSidebar"] h3 { color: #F0EDE8 !important; }
@@ -128,12 +136,41 @@ SECTION STRUCTURE: H2 title, 3-4 questions to answer, specific directive content
 MANDATORY: Key Takeaways box OR What this article covers bullets after intro. Final section positions Schulich ExecEd as learning partner with CTA to specific relevant program.
 
 GEO/SEO (where relevant only): bullet lists for clarity, tables/frameworks for comparisons, synthesis moments, definitional language, FAQ only if high PAA volume."""
+    },
+    "Morison Insurance": {
+        "industry": "Insurance — Canada",
+        "brief": """Canadian insurance brokerage (home, auto, farm, business). Focus on tailored advice, risk education, long-term client relationships.
+URL: https://www.morisoninsurance.ca/
+
+AUDIENCE: Canadian homeowners and property owners — practical decision-makers, risk-aware but not insurance experts.
+
+TONE: Clear, direct, educational. Calm authority — not alarmist or salesy. Plain language, explain jargon when used. Focus on why something matters and what the risk is.
+
+CONTENT STRUCTURE: SEO-first. H2s answer specific questions. Logical flow: problem → risk → solution → action. No redundancy. Include edge cases and common misconceptions.
+
+GEO/SEO: Target featured snippets and AI Overviews. Bullet points for scannability, comparison tables where relevant, "what is / does it cover / is it included" phrasing. Include FAQ section for long-tail queries. Define terms clearly for LLM retrieval.
+
+CTA: Naturally reinforce why a broker matters. Highlight gaps in standard policies. CTA should feel helpful, not pushy."""
+    },
+    "Tangerine": {
+        "industry": "Digital Banking — Canada",
+        "brief": """Canada's original digital bank (formerly ING DIRECT). 2.5M+ clients. Digital-only, no physical branches, 24/7 access. Products: credit cards, loans, investing accounts, some business services.
+URL: https://www.tangerine.ca/
+
+TONE: Positive and confidence-building. Do not reference or reflect negative online sentiment about banks — universal to the industry, not specific to Tangerine. Frame simplicity and fewer product options as strengths, not limitations.
+
+KEY NARRATIVE: No branches and a streamlined product lineup are features, not drawbacks — especially for first-time investors who benefit from simplicity, clarity, and a low-stress banking experience. Position Tangerine as a smart, modern choice that removes friction and gives peace of mind."""
     }
 }
 
 # ── Session state ────────────────────────────────────────────────────────────
 if "clients" not in st.session_state:
     st.session_state.clients = DEFAULT_CLIENTS.copy()
+else:
+    # Ensure new default clients are always present
+    for name, data in DEFAULT_CLIENTS.items():
+        if name not in st.session_state.clients:
+            st.session_state.clients[name] = data
 if "outline" not in st.session_state:
     st.session_state.outline = None
 if "generated_html" not in st.session_state:
