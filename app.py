@@ -155,53 +155,54 @@ generate_btn = st.button("⚡ Generate Outline + Create Google Doc")
 def build_prompt(topic, main_kw, notes, client_name, client):
     client_section = ""
     if client:
-        client_section = f"\nCLIENT: {client_name} ({client['industry']})\nFOLLOW THESE GUIDELINES STRICTLY:\n{client['brief']}\n"
+        # Send a condensed version of the brief to save tokens
+        brief_lines = client['brief'].strip().split('\n')
+        brief_condensed = '\n'.join(brief_lines[:40])  # first 40 lines
+        client_section = f"\nCLIENT: {client_name}\nGUIDELINES:\n{brief_condensed}\n"
 
-    return f"""You are an expert SEO/GEO content strategist at NP Digital. Create a detailed, client-ready blog outline.
+    notes_line = f"\nNOTES: {notes}" if notes else ""
+
+    return f"""SEO content strategist at NP Digital. Create a blog outline as JSON only.
 {client_section}
 TOPIC: {topic}
-MAIN KEYWORD: {main_kw}
-{"NOTES: " + notes if notes else ""}
+KEYWORD: {main_kw}{notes_line}
 
-Based on your SEO knowledge, infer appropriate word count, content type, audience, halo keywords, PAA questions, SERP features, competing URLs, and section count.
+Rules:
+- Mitsubishi: 6-7 H2s, 1600-2000 words (pillar: 10-12 H2s, 3000+), Key Takeaways after intro, owner manual disclaimer, CTA to vehicle page, no competitor links
+- Schulich: 6-8 H2s, 1200-1500 words, Key Takeaways after intro, academic external links, CTA to specific program
+- All: 3 questions per section, 3 specific content suggestions, GEO elements only where valuable
+- Keep all string values SHORT (under 120 chars each)
 
-OUTLINE PATTERNS (from real approved examples):
-- Mitsubishi blogs: 6-7 sections, 1600-2000 words, comparison tables, checklists, FAQ schema for high-PAA topics, Key Takeaways or What this covers after intro, mandatory owner's manual disclaimer, CTA to vehicle/configure page, optional sections labeled
-- Mitsubishi pillar pages: 10-12 sections, 3000+ words
-- Schulich blogs: 6-8 sections, 1200-1500 words, Key Takeaways box after intro, academic external links only, calm tone, CTA to specific Schulich program
-- ALL: Questions to answer per section (3-4 specific), directive content suggestions, GEO elements only where genuinely valuable
-
-Return ONLY valid JSON, no markdown, no backticks:
+Return ONLY this JSON:
 {{
-  "proposedTitle": "H1 title",
-  "contentObjective": "one sentence",
+  "proposedTitle": "string",
+  "contentObjective": "string",
   "url": "/slug",
-  "targetWordCount": "e.g. 1600-2000",
-  "audience": "specific audience",
+  "targetWordCount": "string",
+  "audience": "string",
   "mainKeyword": "{main_kw}",
   "haloKeywords": ["kw1","kw2","kw3","kw4","kw5"],
-  "peopleAlsoAsk": ["q1","q2","q3","q4","q5","q6","q7"],
-  "serpFeatureType": "AIO / Featured snippet / PAA",
-  "serpFeaturePreview": "what a snippet would say",
+  "peopleAlsoAsk": ["q1","q2","q3","q4","q5"],
+  "serpFeatureType": "string",
+  "serpFeaturePreview": "string",
   "topRankingUrls": [
-    {{"url":"example.com/page","topKeyword":"kw","estTraffic":"2,000","wordCount":"1,800"}},
-    {{"url":"example2.com/page","topKeyword":"kw","estTraffic":"1,200","wordCount":"2,100"}},
-    {{"url":"example3.com/page","topKeyword":"kw","estTraffic":"800","wordCount":"1,500"}},
-    {{"url":"example4.com/page","topKeyword":"kw","estTraffic":"600","wordCount":"2,300"}}
+    {{"url":"domain.com/page","topKeyword":"kw","estTraffic":"2,000","wordCount":"1,800"}},
+    {{"url":"domain2.com/page","topKeyword":"kw","estTraffic":"1,200","wordCount":"2,100"}},
+    {{"url":"domain3.com/page","topKeyword":"kw","estTraffic":"800","wordCount":"1,500"}}
   ],
-  "introNote": "e.g. Add Key Takeaways box with 3-4 bullets after intro",
-  "proposedTitleTag": "under 60 chars",
-  "proposedMetaDescription": "under 155 chars",
-  "disclaimer": "for Mitsubishi: full disclaimer with URL, others: null",
+  "introNote": "string",
+  "proposedTitleTag": "string under 60 chars",
+  "proposedMetaDescription": "string under 155 chars",
+  "disclaimer": "string or null",
   "sections": [
     {{
-      "h2": "title",
+      "h2": "string",
       "optional": false,
       "questionsToAnswer": ["q1","q2","q3"],
-      "contentSuggestion": ["suggestion 1","suggestion 2","suggestion 3"],
-      "geoElement": "specific GEO suggestion or null",
-      "internalLinks": ["url or placeholder"],
-      "externalLinks": ["url"],
+      "contentSuggestion": ["s1","s2","s3"],
+      "geoElement": "string or null",
+      "internalLinks": ["url1"],
+      "externalLinks": ["url1"],
       "ctaUrl": null,
       "ctaCopy": null
     }}
@@ -328,7 +329,7 @@ if generate_btn:
                 anthropic_client = anthropic.Anthropic(api_key=api_key)
                 message = anthropic_client.messages.create(
                     model="claude-haiku-4-5-20251001",
-                    max_tokens=4000,
+                    max_tokens=6000,
                     system="You are an expert SEO/GEO content strategist. Respond ONLY with valid JSON. No markdown, no backticks, no explanation before or after the JSON.",
                     messages=[{"role": "user", "content": build_prompt(topic, main_kw, notes, client_name, client)}]
                 )
