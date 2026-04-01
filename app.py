@@ -328,12 +328,17 @@ if generate_btn:
                 anthropic_client = anthropic.Anthropic(api_key=api_key)
                 message = anthropic_client.messages.create(
                     model="claude-haiku-4-5-20251001",
-                    max_tokens=2000,
-                    system="You are an expert SEO/GEO content strategist. Respond ONLY with valid JSON. No markdown, no backticks, no explanation.",
+                    max_tokens=4000,
+                    system="You are an expert SEO/GEO content strategist. Respond ONLY with valid JSON. No markdown, no backticks, no explanation before or after the JSON.",
                     messages=[{"role": "user", "content": build_prompt(topic, main_kw, notes, client_name, client)}]
                 )
                 raw = message.content[0].text.strip()
                 raw = raw.replace("```json", "").replace("```", "").strip()
+                # Find the JSON object boundaries
+                start = raw.find("{")
+                end = raw.rfind("}") + 1
+                if start != -1 and end > start:
+                    raw = raw[start:end]
                 outline = json.loads(raw)
                 st.session_state.outline = outline
             except Exception as e:
