@@ -172,6 +172,7 @@ Rules:
 - Schulich: 6-8 H2s, 1200-1500 words, Key Takeaways after intro, academic external links, CTA to specific program
 - All: 3 questions per section, 3 specific content suggestions, GEO elements only where valuable
 - Keep all string values SHORT (under 120 chars each)
+- For topRankingUrls: only use well-known domains you are certain exist (e.g. caa.ca, nhtsa.gov, canada.ca, hbr.org). Use domain only — never fabricate URL paths. If unsure, use the homepage URL only.
 
 Return ONLY this JSON:
 {{
@@ -186,9 +187,9 @@ Return ONLY this JSON:
   "serpFeatureType": "string",
   "serpFeaturePreview": "string",
   "topRankingUrls": [
-    {{"url":"domain.com/page","topKeyword":"kw","estTraffic":"2,000","wordCount":"1,800"}},
-    {{"url":"domain2.com/page","topKeyword":"kw","estTraffic":"1,200","wordCount":"2,100"}},
-    {{"url":"domain3.com/page","topKeyword":"kw","estTraffic":"800","wordCount":"1,500"}}
+    {{"url":"domain.com (homepage or known section only — no fabricated paths)","topKeyword":"kw","estTraffic":"2,000","wordCount":"1,800"}},
+    {{"url":"domain2.com","topKeyword":"kw","estTraffic":"1,200","wordCount":"2,100"}},
+    {{"url":"domain3.com","topKeyword":"kw","estTraffic":"800","wordCount":"1,500"}}
   ],
   "introNote": "string",
   "proposedTitleTag": "string under 60 chars",
@@ -244,7 +245,7 @@ def build_doc_sections(outline):
     # Metadata fields - label bold, value normal
     add("label_value", "", label="Proposed Title [H1]: ", value=outline.get("proposedTitle",""))
     add("label_value", "", label="Content Objective: ", value=outline.get("contentObjective",""))
-    add("orange_label", f"URL [New Page]: {outline.get('url','')}")
+    add("label_value", "", label="URL [New Page]: ", value=outline.get("url",""))
     add("label_value", "", label="Target Word Count: ", value=outline.get("targetWordCount",""))
     add("label_value", "", label="Audience: ", value=outline.get("audience",""))
     add("label_value", "", label="Main Keyword: ", value=outline.get("mainKeyword",""))
@@ -290,36 +291,32 @@ def build_doc_sections(outline):
             add("bold", "Questions to answer:")
             for q in sec["questionsToAnswer"]:
                 add("bullet", q)
-            add("spacer", "")
 
         if sec.get("contentSuggestion"):
             add("bold", "Content Suggestion:")
             for s in sec["contentSuggestion"]:
                 add("bullet", s)
-            add("spacer", "")
 
         geo = sec.get("geoElement")
         if geo and geo != "null" and geo is not None:
             add("bold", "GEO/SEO element:")
             add("normal", geo)
-            add("spacer", "")
 
         if sec.get("internalLinks"):
             add("bold", "Internal links:")
             for l in sec["internalLinks"]:
                 add("bullet", l)
-            add("spacer", "")
 
         if sec.get("externalLinks"):
             add("bold", "External links:")
             for l in sec["externalLinks"]:
                 add("bullet", l)
-            add("spacer", "")
 
         if sec.get("ctaUrl"):
             add("label_value", "", label="Call to action URL: ", value=sec["ctaUrl"])
             add("label_value", "", label="Call to action copy suggestion: ", value=sec.get("ctaCopy",""))
-            add("spacer", "")
+
+        add("spacer", "")
 
     disclaimer = outline.get("disclaimer")
     if disclaimer and disclaimer != "null":
