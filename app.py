@@ -210,17 +210,44 @@ Return ONLY this JSON:
 }}"""
 
 
+def get_doc_title(client_name, proposed_title):
+    """Generate standardized doc title: [Client] New Blog Outline - [Title] - [Month Year]"""
+    from datetime import datetime
+    month_map = {
+        1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr", 5: "May", 6: "Jun",
+        7: "Jul", 8: "Aug", 9: "Sept", 10: "Oct", 11: "Nov", 12: "Dec"
+    }
+    now = datetime.now()
+    month_year = f"{month_map[now.month]} {now.year}"
+
+    client_prefix_map = {
+        "Mitsubishi Motors Canada": "MMSCAN",
+        "Schulich ExecEd": "Schulich ExecEd"
+    }
+    prefix = client_prefix_map.get(client_name, client_name)
+    return f"{prefix} New Blog Outline - {proposed_title} - {month_year}"
+
+
 def build_doc_sections(outline):
     sections = []
 
-    def add(t, text):
-        sections.append({"type": t, "text": str(text or "")})
+    def add(t, text, label=None, value=None):
+        if t == "label_value":
+            sections.append({"type": t, "label": str(label or ""), "value": str(value or ""), "text": ""})
+        else:
+            sections.append({"type": t, "text": str(text or "")})
 
-    add("bold", f"Content Objective: {outline.get('contentObjective','')}")
-    add("normal", f"URL: {outline.get('url','')}")
-    add("normal", f"Target Word Count: {outline.get('targetWordCount','')}")
-    add("normal", f"Audience: {outline.get('audience','')}")
-    add("normal", f"Main Keyword: {outline.get('mainKeyword','')}")
+    # Orange H1 title
+    add("title", f"Content Outline: {outline.get('proposedTitle','')}")
+    add("spacer", "")
+
+    # Metadata fields - label bold, value normal
+    add("label_value", "", label="Proposed Title [H1]: ", value=outline.get("proposedTitle",""))
+    add("label_value", "", label="Content Objective: ", value=outline.get("contentObjective",""))
+    add("orange_label", f"URL [New Page]: {outline.get('url','')}")
+    add("label_value", "", label="Target Word Count: ", value=outline.get("targetWordCount",""))
+    add("label_value", "", label="Audience: ", value=outline.get("audience",""))
+    add("label_value", "", label="Main Keyword: ", value=outline.get("mainKeyword",""))
     add("spacer", "")
 
     if outline.get("haloKeywords"):
@@ -236,17 +263,18 @@ def build_doc_sections(outline):
         add("spacer", "")
 
     add("bold", "SERP Feature:")
-    add("normal", f"Type: {outline.get('serpFeatureType','')}")
-    add("normal", f"Preview: {outline.get('serpFeaturePreview','')}")
+    add("label_value", "", label="Type: ", value=outline.get("serpFeatureType",""))
+    add("label_value", "", label="Preview: ", value=outline.get("serpFeaturePreview",""))
     add("spacer", "")
-    add("bold", f"Proposed Title Tag: {outline.get('proposedTitleTag','')}")
-    add("bold", f"Proposed Meta Description: {outline.get('proposedMetaDescription','')}")
+
+    add("label_value", "", label="Proposed Title Tag: ", value=outline.get("proposedTitleTag",""))
+    add("label_value", "", label="Proposed Meta Description: ", value=outline.get("proposedMetaDescription",""))
     add("spacer", "")
 
     if outline.get("topRankingUrls"):
         add("bold", "Top Ranking URLs:")
         for r in outline["topRankingUrls"]:
-            add("normal", f"{r.get('url','')} | {r.get('topKeyword','')} | Traffic: {r.get('estTraffic','')} | Words: {r.get('wordCount','')}")
+            add("normal", f"{r.get('url','')} | {r.get('topKeyword','')} | Est. traffic: {r.get('estTraffic','')} | Word count: {r.get('wordCount','')}")
         add("spacer", "")
 
     if outline.get("introNote"):
@@ -271,7 +299,7 @@ def build_doc_sections(outline):
             add("spacer", "")
 
         geo = sec.get("geoElement")
-        if geo and geo != "null":
+        if geo and geo != "null" and geo is not None:
             add("bold", "GEO/SEO element:")
             add("normal", geo)
             add("spacer", "")
@@ -289,8 +317,8 @@ def build_doc_sections(outline):
             add("spacer", "")
 
         if sec.get("ctaUrl"):
-            add("bold", f"Call to action URL: {sec['ctaUrl']}")
-            add("bold", f"Call to action copy: {sec.get('ctaCopy','')}")
+            add("label_value", "", label="Call to action URL: ", value=sec["ctaUrl"])
+            add("label_value", "", label="Call to action copy suggestion: ", value=sec.get("ctaCopy",""))
             add("spacer", "")
 
     disclaimer = outline.get("disclaimer")
@@ -303,8 +331,8 @@ def build_doc_sections(outline):
     return sections
 
 
-def push_to_docs(script_url, title, sections):
-    res = requests.post(script_url, json={"title": title, "sections": sections}, timeout=30)
+def push_to_docs(script_url, title, sections, client_name=""):
+    res = requests.post(script_url, json={"title": title, "sections": sections, "clientName": client_name}, timeout=30)
     return res.json()
 
 
@@ -348,7 +376,8 @@ if generate_btn:
 
         with st.spinner("Creating Google Doc..."):
             try:
-                doc_title = (outline.get("proposedTitle") or topic)[:100]
+                proposed_title = (outline.get("proposedTitle") or topic)
+                doc_title = get_doc_title(client_name, proposed_title)
                 sections = build_doc_sections(outline)
                 result = push_to_docs(script_url, doc_title, sections)
                 if result.get("success"):
