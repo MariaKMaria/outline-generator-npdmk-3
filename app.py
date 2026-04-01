@@ -20,11 +20,13 @@ st.markdown("""
   h3 { font-size: 13px !important; font-weight: 500 !important; color: #9E9A94 !important; }
   p, div { color: #1A1916; }
   .stButton > button {
-    background: #E36C09 !important; color: white !important; border: none !important;
+    background: #E36C09 !important; color: #FFFFFF !important; border: none !important;
     font-weight: 700 !important; border-radius: 8px !important; padding: 12px 32px !important;
     font-size: 14px !important; width: 100% !important; letter-spacing: 0.02em;
   }
-  .stButton > button:hover { background: #c45e07 !important; }
+  .stButton > button:hover { background: #c45e07 !important; color: #FFFFFF !important; }
+  .stButton > button p { color: #FFFFFF !important; }
+  .stButton > button span { color: #FFFFFF !important; }
   .stSelectbox label, .stTextInput label, .stTextArea label {
     font-size: 11px !important; font-weight: 600 !important;
     text-transform: uppercase; letter-spacing: 0.07em; color: #6B6760 !important;
@@ -214,7 +216,7 @@ with st.sidebar:
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 st.markdown('<div class="npd-tag">SEO + GEO</div>', unsafe_allow_html=True)
-st.markdown("## Blog Outline Generator")
+st.markdown('<h2 style="color:#1A1916 !important;font-weight:700 !important;font-size:22px !important;">Blog Outline Generator</h2>', unsafe_allow_html=True)
 st.markdown('<p style="color:#6B6760;font-size:14px;margin-top:-8px;margin-bottom:24px;">Select a client, enter a topic and keyword — Claude handles the rest.</p>', unsafe_allow_html=True)
 
 col1, col2 = st.columns([1, 2])
