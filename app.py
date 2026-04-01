@@ -272,12 +272,6 @@ def build_doc_sections(outline):
     add("label_value", "", label="Proposed Meta Description: ", value=outline.get("proposedMetaDescription",""))
     add("spacer", "")
 
-    if outline.get("topRankingUrls"):
-        add("bold", "Top Ranking URLs:")
-        for r in outline["topRankingUrls"]:
-            add("normal", f"{r.get('url','')} | {r.get('topKeyword','')} | Est. traffic: {r.get('estTraffic','')} | Word count: {r.get('wordCount','')}")
-        add("spacer", "")
-
     if outline.get("introNote"):
         add("bold", "Intro note:")
         add("normal", outline["introNote"])
@@ -307,10 +301,10 @@ def build_doc_sections(outline):
             for l in sec["internalLinks"]:
                 add("bullet", l)
 
-        if sec.get("externalLinks"):
-            add("bold", "External links:")
-            for l in sec["externalLinks"]:
-                add("bullet", l)
+        add("bold", "External links:")
+        num_bullets = max(2, len(sec.get("externalLinks", [])))
+        for _ in range(num_bullets):
+            add("bullet", "")
 
         if sec.get("ctaUrl"):
             add("label_value", "", label="Call to action URL: ", value=sec["ctaUrl"])
