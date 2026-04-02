@@ -283,7 +283,7 @@ with st.sidebar:
     is_admin = bool(admin_email) and auth_email == admin_email
 
     if is_admin:
-        st.markdown('<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#E36C09;margin-bottom:8px;">Admin</div>', unsafe_allow_html=True)
+    
         log = st.session_state.usage_log
         if st.button(f"📊 View usage log ({len(log)} entries)", key="open_log"):
             st.session_state.show_admin_log = True
