@@ -693,14 +693,14 @@ if generate_btn:
                 doc_title = get_doc_title(client_name, proposed_title)
                 sections = build_doc_sections(outline)
                 log_data = {
-                        "user": st.session_state.user_name or "Unknown",
-                        "email": st.session_state.user_email or "",
-                        "client": client_name or "No client",
-                        "topic": topic,
-                        "keyword": main_kw,
-                        "contentType": content_type
-                    }
-                    result = push_to_docs(script_url, doc_title, sections, client_name, log_data)
+                    "user": st.session_state.user_name or "Unknown",
+                    "email": st.session_state.user_email or "",
+                    "client": client_name or "No client",
+                    "topic": topic,
+                    "keyword": main_kw,
+                    "contentType": content_type
+                }
+                result = push_to_docs(script_url, doc_title, sections, client_name, log_data)
                 if result.get("success"):
                     st.session_state.doc_url = result["url"]
                     st.session_state.doc_title = doc_title
