@@ -246,12 +246,16 @@ with st.sidebar:
                 st.warning("Name and brief required.")
 
     st.markdown("---")
-    # Only show admin section to the admin user
+    # Only show admin section to the admin user - use actual Google auth email
     try:
         admin_email = st.secrets["ADMIN_EMAIL"].lower().strip()
     except:
         admin_email = ""
-    is_admin = bool(admin_email) and st.session_state.get("user_email", "").lower().strip() == admin_email
+    try:
+        auth_email = st.experimental_user.email.lower().strip() if st.experimental_user.email else ""
+    except:
+        auth_email = st.session_state.get("user_email", "").lower().strip()
+    is_admin = bool(admin_email) and auth_email == admin_email
 
     if is_admin:
         st.markdown('<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#E36C09;margin-bottom:8px;">Admin</div>', unsafe_allow_html=True)
@@ -278,14 +282,41 @@ if st.session_state.get("show_admin_log"):
     st.markdown('<div style="font-size:22px;font-weight:700;color:#1A1916;margin-bottom:4px;">Usage Log</div>', unsafe_allow_html=True)
     st.markdown('<p style="color:#6B6760;font-size:14px;margin-bottom:24px;">All outline generations this session</p>', unsafe_allow_html=True)
 
-    log = st.session_state.usage_log
+    # Load log from Google Sheet
+    import gspread
+    from google.oauth2 import service_account
+    log = []
+    sheet_error = None
+    try:
+        script_url = st.secrets["APPS_SCRIPT_URL"]
+        # Fetch log via Apps Script
+        log_res = requests.get(script_url + "?action=getLog&sheetId=1jYWsWD2tpRQQD03ey2js1KZnhpOZYvaogpIQe2KvIkI", timeout=15)
+        log_data_raw = log_res.json()
+        log = log_data_raw.get("rows", [])
+    except Exception as e:
+        sheet_error = str(e)
+        # Fall back to session log
+        log = [{
+            "timestamp": e["timestamp"],
+            "user": e["user"],
+            "email": e.get("email",""),
+            "client": e["client"],
+            "topic": e["topic"],
+            "keyword": e["keyword"],
+            "contentType": e.get("content_type",""),
+            "url": ""
+        } for e in st.session_state.usage_log]
+
+    if sheet_error:
+        st.warning(f"Could not load from sheet, showing session data. Error: {sheet_error}")
+
     if not log:
-        st.info("No activity yet this session.")
+        st.info("No activity yet.")
     else:
-        # Summary stats
         from collections import Counter
-        users = Counter(e['user'] for e in log)
-        clients = Counter(e['client'] for e in log)
+        users = Counter(e.get("user","") or e[1] if isinstance(e, list) else e.get("user","") for e in log)
+        clients_list = [e.get("client","") or (e[3] if isinstance(e, list) else "") for e in log]
+        clients = Counter(clients_list)
 
         col_a, col_b, col_c = st.columns(3)
         with col_a:
@@ -306,43 +337,49 @@ if st.session_state.get("show_admin_log"):
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # Per-user summary table
+        # Per-user summary
         st.markdown('<div style="font-size:14px;font-weight:600;color:#1A1916;margin-bottom:12px;">By user</div>', unsafe_allow_html=True)
         user_data = {}
         for entry in log:
-            u = entry['user']
+            if isinstance(entry, list):
+                u, em, cl, ts = entry[1], entry[2], entry[3], entry[0]
+            else:
+                u, em, cl, ts = entry.get("user",""), entry.get("email",""), entry.get("client",""), entry.get("timestamp","")
             if u not in user_data:
-                user_data[u] = {"email": entry.get("email",""), "count": 0, "clients": set(), "last": entry["timestamp"]}
+                user_data[u] = {"email": em, "count": 0, "clients": set(), "last": ts}
             user_data[u]["count"] += 1
-            user_data[u]["clients"].add(entry["client"])
-            user_data[u]["last"] = entry["timestamp"]
+            user_data[u]["clients"].add(cl)
+            user_data[u]["last"] = ts
 
-        header_html = '''<div style="display:grid;grid-template-columns:1.5fr 2fr 0.5fr 1.5fr 1.5fr;gap:8px;padding:8px 12px;background:#F5F3EE;border-radius:6px;font-size:11px;font-weight:600;color:#6B6760;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">
+        st.markdown('''<div style="display:grid;grid-template-columns:1.5fr 2fr 0.5fr 1.5fr 1.5fr;gap:8px;padding:8px 12px;background:#F5F3EE;border-radius:6px;font-size:11px;font-weight:600;color:#6B6760;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">
   <div>Name</div><div>Email</div><div>Outlines</div><div>Clients</div><div>Last active</div>
-</div>'''
-        st.markdown(header_html, unsafe_allow_html=True)
-
-        for user, data in user_data.items():
+</div>''', unsafe_allow_html=True)
+        for user, udata in user_data.items():
             st.markdown(f'''<div style="display:grid;grid-template-columns:1.5fr 2fr 0.5fr 1.5fr 1.5fr;gap:8px;padding:10px 12px;border-bottom:1px solid #E8E4DE;font-size:13px;color:#1A1916;align-items:center;">
   <div style="font-weight:500;">{user}</div>
-  <div style="color:#6B6760;font-size:12px;">{data["email"]}</div>
-  <div style="font-weight:600;color:#E36C09;">{data["count"]}</div>
-  <div style="font-size:12px;color:#6B6760;">{", ".join(data["clients"])}</div>
-  <div style="font-size:12px;color:#9E9A94;">{data["last"]}</div>
+  <div style="color:#6B6760;font-size:12px;">{udata["email"]}</div>
+  <div style="font-weight:600;color:#E36C09;">{udata["count"]}</div>
+  <div style="font-size:12px;color:#6B6760;">{", ".join(udata["clients"])}</div>
+  <div style="font-size:12px;color:#9E9A94;">{udata["last"]}</div>
 </div>''', unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
-
-        # Full log
         st.markdown('<div style="font-size:14px;font-weight:600;color:#1A1916;margin-bottom:12px;">Full log</div>', unsafe_allow_html=True)
         for entry in reversed(log):
+            if isinstance(entry, list):
+                ts, user, em, cl, topic, kw, ct, url = (entry + [""] * 8)[:8]
+            else:
+                ts = entry.get("timestamp",""); user = entry.get("user",""); em = entry.get("email","")
+                cl = entry.get("client",""); topic = entry.get("topic",""); kw = entry.get("keyword","")
+                ct = entry.get("contentType",""); url = entry.get("url","")
             st.markdown(f'''<div style="padding:10px 12px;border-bottom:1px solid #E8E4DE;font-size:13px;">
-  <div style="display:flex;justify-content:space-between;align-items:center;">
-    <div><span style="font-weight:500;color:#1A1916;">{entry["user"]}</span> <span style="color:#9E9A94;font-size:12px;">· {entry.get("email","")}</span></div>
-    <div style="font-size:12px;color:#9E9A94;">{entry["timestamp"]}</div>
+  <div style="display:flex;justify-content:space-between;">
+    <div><span style="font-weight:500;">{user}</span> <span style="color:#9E9A94;font-size:12px;">· {em}</span></div>
+    <div style="font-size:12px;color:#9E9A94;">{ts}</div>
   </div>
-  <div style="color:#1A1916;margin-top:4px;">{entry["topic"]}</div>
-  <div style="font-size:12px;color:#6B6760;margin-top:2px;">{entry["client"]} · {entry["keyword"]} · {entry.get("content_type","")}</div>
+  <div style="margin-top:4px;">{topic}</div>
+  <div style="font-size:12px;color:#6B6760;margin-top:2px;">{cl} · {kw} · {ct}</div>
+  {f'<div style="font-size:11px;margin-top:2px;"><a href="{url}" target="_blank" style="color:#E36C09;">Open doc →</a></div>' if url else ''}
 </div>''', unsafe_allow_html=True)
 
     st.stop()
@@ -601,8 +638,11 @@ def build_doc_sections(outline):
     return sections
 
 
-def push_to_docs(script_url, title, sections, client_name=""):
-    res = requests.post(script_url, json={"title": title, "sections": sections, "clientName": client_name}, timeout=30)
+def push_to_docs(script_url, title, sections, client_name="", log_data=None):
+    payload = {"title": title, "sections": sections, "clientName": client_name}
+    if log_data:
+        payload["logData"] = log_data
+    res = requests.post(script_url, json=payload, timeout=30)
     return res.json()
 
 
@@ -652,7 +692,15 @@ if generate_btn:
                 proposed_title = (outline.get("proposedTitle") or topic)
                 doc_title = get_doc_title(client_name, proposed_title)
                 sections = build_doc_sections(outline)
-                result = push_to_docs(script_url, doc_title, sections)
+                log_data = {
+                        "user": st.session_state.user_name or "Unknown",
+                        "email": st.session_state.user_email or "",
+                        "client": client_name or "No client",
+                        "topic": topic,
+                        "keyword": main_kw,
+                        "contentType": content_type
+                    }
+                    result = push_to_docs(script_url, doc_title, sections, client_name, log_data)
                 if result.get("success"):
                     st.session_state.doc_url = result["url"]
                     st.session_state.doc_title = doc_title
