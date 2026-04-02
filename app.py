@@ -428,36 +428,62 @@ notes = st.text_input("Notes (optional)", placeholder="e.g. focus on Outlander P
 
 # File upload section
 example_text = None
-with st.expander("📎 Upload example outline (optional — .docx)"):
+with st.expander("📎 Upload example outline(s) (optional — .docx)"):
     saved_examples = st.session_state.client_examples.get(selected_client, [])
+
+    # Show saved examples with checkboxes and delete buttons
     if saved_examples:
-        st.markdown(f'<div style="font-size:12px;color:#6B6760;margin-bottom:8px;">{len(saved_examples)} saved example(s) for {selected_client}</div>', unsafe_allow_html=True)
-        use_saved = st.checkbox("Use saved example as reference", value=True)
-        if use_saved:
-            example_text = saved_examples[-1]["text"]
-            st.caption(f"Using: {saved_examples[-1]['name']}")
-    uploaded_file = st.file_uploader("Upload a new example outline", type=["docx"], label_visibility="collapsed")
-    if uploaded_file:
-        file_bytes = uploaded_file.read()
-        extracted = extract_docx_text(file_bytes)
-        example_text = extracted
-        st.success(f"Loaded: {uploaded_file.name}")
-        col_save, col_preview = st.columns(2)
-        with col_save:
-            if st.button("Save to client profile", key="save_example"):
-                if selected_client != "— no client —":
-                    if selected_client not in st.session_state.client_examples:
-                        st.session_state.client_examples[selected_client] = []
-                    st.session_state.client_examples[selected_client].append({
-                        "name": uploaded_file.name,
-                        "text": extracted
-                    })
-                    st.success(f"Saved to {selected_client} profile!")
-                else:
-                    st.warning("Select a client first to save.")
-        with col_preview:
-            if st.checkbox("Preview extracted text"):
-                st.text_area("", extracted[:600] + "...", height=150, disabled=True)
+        st.markdown(f'<div style="font-size:12px;color:#6B6760;margin-bottom:8px;">Saved examples for {selected_client}:</div>', unsafe_allow_html=True)
+        selected_texts = []
+        for i, ex in enumerate(saved_examples):
+            col_chk, col_del = st.columns([6, 1])
+            with col_chk:
+                if st.checkbox(ex["name"], value=True, key=f"use_ex_{i}"):
+                    selected_texts.append(ex["text"])
+            with col_del:
+                if st.button("🗑", key=f"del_ex_{i}", help=f"Remove {ex['name']}"):
+                    st.session_state.client_examples[selected_client].pop(i)
+                    st.rerun()
+        if selected_texts:
+            example_text = "\n\n---\n\n".join(selected_texts)
+
+    # Upload new files (accept multiple)
+    uploaded_files = st.file_uploader(
+        "Upload example outline(s)",
+        type=["docx"],
+        accept_multiple_files=True,
+        label_visibility="collapsed"
+    )
+    if uploaded_files:
+        new_texts = []
+        for uf in uploaded_files:
+            extracted = extract_docx_text(uf.read())
+            new_texts.append(extracted)
+            st.success(f"Loaded: {uf.name}")
+        # Combine with any saved examples already selected
+        if example_text:
+            example_text = example_text + "\n\n---\n\n" + "\n\n---\n\n".join(new_texts)
+        else:
+            example_text = "\n\n---\n\n".join(new_texts)
+
+        if st.button("Save all to client profile", key="save_example"):
+            if selected_client != "— no client —":
+                if selected_client not in st.session_state.client_examples:
+                    st.session_state.client_examples[selected_client] = []
+                for uf in uploaded_files:
+                    uf.seek(0)
+                    extracted = extract_docx_text(uf.read())
+                    # Avoid duplicates
+                    existing_names = [e["name"] for e in st.session_state.client_examples[selected_client]]
+                    if uf.name not in existing_names:
+                        st.session_state.client_examples[selected_client].append({
+                            "name": uf.name,
+                            "text": extracted
+                        })
+                st.success(f"Saved {len(uploaded_files)} example(s) to {selected_client} profile!")
+                st.rerun()
+            else:
+                st.warning("Select a client first to save.")
 
 if selected_client != "— no client —":
     client = st.session_state.clients[selected_client]
@@ -477,7 +503,7 @@ def build_prompt(topic, main_kw, notes, client_name, client, content_type="Blog 
         client_section = f"\nCLIENT: {client_name}\nGUIDELINES:\n{brief_condensed}\n"
 
     notes_line = f"\nNOTES: {notes}" if notes else ""
-    example_line = f"\nEXAMPLE OUTLINE STRUCTURE (follow this style/depth/format):\n{example_text[:800]}\n" if example_text else ""
+    example_line = f"\nEXAMPLE OUTLINE STRUCTURE (follow style/structure only, not content):\n{example_text[:300]}\n" if example_text else ""
 
     return f"""SEO content strategist at NP Digital. Create a blog outline as JSON only.
 {client_section}
