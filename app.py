@@ -625,12 +625,12 @@ def build_doc_sections(outline):
 
         if sec.get("questionsToAnswer"):
             add("bold", "Questions to answer:")
-            for q in sec["questionsToAnswer"]:
+            for q in (sec["questionsToAnswer"] or []):
                 add("bullet", q)
 
         if sec.get("contentSuggestion"):
             add("bold", "Content Suggestion:")
-            for s in sec["contentSuggestion"]:
+            for s in (sec["contentSuggestion"] or []):
                 add("bullet", s)
 
         geo = sec.get("geoElement")
@@ -640,11 +640,11 @@ def build_doc_sections(outline):
 
         if sec.get("internalLinks"):
             add("bold", "Internal links:")
-            for l in sec["internalLinks"]:
+            for l in (sec["internalLinks"] or []):
                 add("bullet", l)
 
         add("bold", "External links:")
-        num_bullets = max(2, len(sec.get("externalLinks", [])))
+        num_bullets = max(2, len(sec.get("externalLinks") or []))
         for _ in range(num_bullets):
             add("bullet", "")
 
