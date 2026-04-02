@@ -282,9 +282,7 @@ if st.session_state.get("show_admin_log"):
     st.markdown('<div style="font-size:22px;font-weight:700;color:#1A1916;margin-bottom:4px;">Usage Log</div>', unsafe_allow_html=True)
     st.markdown('<p style="color:#6B6760;font-size:14px;margin-bottom:24px;">All outline generations this session</p>', unsafe_allow_html=True)
 
-    # Load log from Google Sheet
-    import gspread
-    from google.oauth2 import service_account
+    # Load log from Google Sheet via Apps Script
     log = []
     sheet_error = None
     try:
