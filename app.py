@@ -195,12 +195,16 @@ if not st.session_state.user_name:
         entered_name = st.text_input("Your name", placeholder="e.g. Maria K.")
         entered_email = st.text_input("Your email", placeholder="e.g. maria@npdigital.com")
         if st.button("Continue →", use_container_width=True):
-            if entered_name.strip() and entered_email.strip():
-                st.session_state.user_name = entered_name.strip()
-                st.session_state.user_email = entered_email.strip()
-                st.rerun()
+            import re
+            email_valid = re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]{2,}$", entered_email.strip()) if entered_email.strip() else False
+            if not entered_name.strip():
+                st.error("Please enter your name.")
+            elif not entered_email.strip() or not email_valid:
+                st.error("Please enter a valid email address.")
             else:
-                st.error("Please enter both your name and email to continue.")
+                st.session_state.user_name = entered_name.strip()
+                st.session_state.user_email = entered_email.strip().lower()
+                st.rerun()
     st.markdown('</div></div>', unsafe_allow_html=True)
     st.stop()
 
@@ -242,10 +246,10 @@ with st.sidebar:
     st.markdown("---")
     # Only show admin section to the admin user
     try:
-        admin_email = st.secrets.get("ADMIN_EMAIL", "")
+        admin_email = st.secrets["ADMIN_EMAIL"].lower().strip()
     except:
         admin_email = ""
-    is_admin = admin_email and st.session_state.get("user_email", "").lower() == admin_email.lower()
+    is_admin = bool(admin_email) and st.session_state.get("user_email", "").lower().strip() == admin_email
 
     if is_admin:
         st.markdown('<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#E36C09;margin-bottom:8px;">Admin</div>', unsafe_allow_html=True)
