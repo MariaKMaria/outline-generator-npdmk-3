@@ -149,7 +149,9 @@ SECTION STRUCTURE: H2 title, 3-4 questions to answer, specific directive content
 
 MANDATORY: Key Takeaways box OR What this article covers bullets after intro. Final section positions Schulich ExecEd as learning partner with CTA to specific relevant program.
 
-GEO/SEO (where relevant only): bullet lists for clarity, tables/frameworks for comparisons, synthesis moments, definitional language, FAQ only if high PAA volume."""
+GEO/SEO (where relevant only): bullet lists for clarity, tables/frameworks for comparisons, synthesis moments, definitional language, FAQ only if high PAA volume.
+
+SECTION DEPTH GUIDANCE: Assess each H2 section by search intent alignment, featured snippet/PAA potential, and proximity to conversion. High-priority sections (typically 2-3 per outline) should have 4-5 detailed content suggestions with specific angles, stats, or Canadian examples to include. Standard sections get 3 suggestions. Supporting or context sections get 2 concise suggestions."""
     },
     "Morison Insurance": {
         "industry": "Insurance — Canada",
@@ -164,7 +166,9 @@ CONTENT STRUCTURE: SEO-first. H2s answer specific questions. Logical flow: probl
 
 GEO/SEO: Target featured snippets and AI Overviews. Bullet points for scannability, comparison tables where relevant, "what is / does it cover / is it included" phrasing. Include FAQ section for long-tail queries. Define terms clearly for LLM retrieval.
 
-CTA: Naturally reinforce why a broker matters. Highlight gaps in standard policies. CTA should feel helpful, not pushy."""
+CTA: Naturally reinforce why a broker matters. Highlight gaps in standard policies. CTA should feel helpful, not pushy.
+
+SECTION DEPTH GUIDANCE: Assess each H2 section by search intent alignment, featured snippet/PAA potential, and proximity to conversion. High-priority sections (typically 2-3 per outline) should have 4-5 detailed content suggestions with specific angles, stats, or Canadian examples to include. Standard sections get 3 suggestions. Supporting or context sections get 2 concise suggestions."""
     },
     "Tangerine": {
         "industry": "Digital Banking — Canada",
@@ -175,7 +179,7 @@ TONE: Positive and confidence-building. Do not reference or reflect negative onl
 
 KEY NARRATIVE: No branches and a streamlined product lineup are features, not drawbacks — especially for first-time investors who benefit from simplicity, clarity, and a low-stress banking experience. Position Tangerine as a smart, modern choice that removes friction and gives peace of mind.
 
-SECTION DEPTH GUIDANCE: Assess each H2 section by search intent alignment, featured snippet/PAA potential, and proximity to conversion. High-priority sections (typically 2-3 per outline) should have 4-5 detailed content suggestions with specific angles, data points, or Canadian examples to include. Standard sections get 3 suggestions. Supporting or context sections get 2 concise suggestions."""
+SECTION DEPTH GUIDANCE: Assess each H2 section by search intent alignment, featured snippet/PAA potential, and proximity to conversion. High-priority sections (typically 2-3 per outline) should have 4-5 detailed content suggestions with specific angles, stats, or Canadian examples to include. Standard sections get 3 suggestions. Supporting or context sections get 2 concise suggestions."""
     }
 }
 
