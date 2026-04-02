@@ -251,6 +251,9 @@ with st.sidebar:
         admin_email = ""
     is_admin = bool(admin_email) and st.session_state.get("user_email", "").lower().strip() == admin_email
 
+    # Debug - remove once working
+    st.sidebar.caption(f"Logged in: {st.session_state.get('user_email','none')} | Admin: {is_admin}")
+
     if is_admin:
         st.markdown('<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#E36C09;margin-bottom:8px;">Admin</div>', unsafe_allow_html=True)
         log = st.session_state.usage_log
