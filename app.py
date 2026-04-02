@@ -173,7 +173,9 @@ URL: https://www.tangerine.ca/
 
 TONE: Positive and confidence-building. Do not reference or reflect negative online sentiment about banks — universal to the industry, not specific to Tangerine. Frame simplicity and fewer product options as strengths, not limitations.
 
-KEY NARRATIVE: No branches and a streamlined product lineup are features, not drawbacks — especially for first-time investors who benefit from simplicity, clarity, and a low-stress banking experience. Position Tangerine as a smart, modern choice that removes friction and gives peace of mind."""
+KEY NARRATIVE: No branches and a streamlined product lineup are features, not drawbacks — especially for first-time investors who benefit from simplicity, clarity, and a low-stress banking experience. Position Tangerine as a smart, modern choice that removes friction and gives peace of mind.
+
+SECTION DEPTH GUIDANCE: Assess each H2 section by search intent alignment, featured snippet/PAA potential, and proximity to conversion. High-priority sections (typically 2-3 per outline) should have 4-5 detailed content suggestions with specific angles, data points, or Canadian examples to include. Standard sections get 3 suggestions. Supporting or context sections get 2 concise suggestions."""
     }
 }
 
