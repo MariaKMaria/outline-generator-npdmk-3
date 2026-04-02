@@ -696,8 +696,8 @@ if generate_btn:
                 anthropic_client = anthropic.Anthropic(api_key=api_key)
                 message = anthropic_client.messages.create(
                     model="claude-haiku-4-5-20251001",
-                    max_tokens=8000,
-                    system="You are an expert SEO/GEO content strategist. Respond ONLY with valid JSON. No markdown, no backticks, no explanation. Keep all string values concise (under 100 chars). You MUST complete the full JSON including all sections and closing braces.",
+                    max_tokens=10000,
+                    system="You are an expert SEO/GEO content strategist. Respond ONLY with valid JSON. No markdown, no backticks, no explanation before or after. Keep ALL string values under 80 chars. Arrays max 5 items. You MUST close all JSON braces and brackets — incomplete JSON is not acceptable.",
                     messages=[{"role": "user", "content": build_prompt(topic, main_kw, notes, client_name, client, content_type, example_text if "example_text" in dir() else None)}]
                 )
                 raw = message.content[0].text.strip()
