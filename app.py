@@ -529,6 +529,8 @@ Rules:
 - Schulich: 6-8 H2s, 1200-1500 words, Key Takeaways after intro, academic external links, CTA to specific program
 - All: 3 questions per section, 3 specific content suggestions, GEO elements only where valuable
 - Keep all string values SHORT (under 100 chars each)
+- EXTERNAL LINKS: Use web search to find 1-2 real, working URLs per section that are credible and directly relevant to that section's topic. Only include URLs you have verified exist. Client-specific rules: Mitsubishi — no competitor automaker sites; Schulich — prefer McKinsey, ScienceDirect, APA, Frontiers, government or academic sources only — NO other business schools, NO HBR; Tangerine — no other banks or financial institutions, credible sources only (government, academic, non-profit financial literacy sites); All clients — no forums, no social media, no paywalled content where possible.
+- INTERNAL LINKS: Leave as empty strings — the reviewer will add these manually
 
 Return ONLY this JSON:
 {{
@@ -654,8 +656,15 @@ def build_doc_sections(outline):
                 add("bullet", l)
 
         add("bold", "External links:")
-        num_bullets = max(2, len(sec.get("externalLinks") or []))
-        for _ in range(num_bullets):
+        ext_links = [l for l in (sec.get("externalLinks") or []) if l and l.strip()]
+        if ext_links:
+            for l in ext_links:
+                add("bullet", l)
+            # Add one blank bullet for any additional links reviewer wants to add
+            add("bullet", "")
+        else:
+            # No links found — add 2 blank bullets for reviewer
+            add("bullet", "")
             add("bullet", "")
 
         if sec.get("ctaUrl"):
