@@ -701,10 +701,17 @@ if generate_btn:
                 message = anthropic_client.messages.create(
                     model="claude-haiku-4-5-20251001",
                     max_tokens=10000,
-                    system="You are an expert SEO/GEO content strategist. Respond ONLY with valid JSON. No markdown, no backticks, no explanation before or after. Keep ALL string values under 80 chars. Arrays max 5 items. You MUST close all JSON braces and brackets — incomplete JSON is not acceptable.",
+                    system="You are an expert SEO/GEO content strategist. You have access to web search — use it to find real current PAA questions, top-ranking URLs, and SERP features for the given keyword before building the outline. Then respond ONLY with valid JSON. No markdown, no backticks, no explanation before or after. Keep ALL string values under 80 chars. Arrays max 5 items. You MUST close all JSON braces and brackets — incomplete JSON is not acceptable.",
+                    tools=[{"type": "web_search_20250305", "name": "web_search"}],
                     messages=[{"role": "user", "content": build_prompt(topic, main_kw, notes, client_name, client, content_type, example_text if "example_text" in dir() else None)}]
                 )
-                raw = message.content[0].text.strip()
+                # Extract text from response — may contain tool_use blocks before final text
+                raw = ""
+                for block in message.content:
+                    if hasattr(block, "text"):
+                        raw = block.text.strip()
+                if not raw:
+                    raw = message.content[0].text.strip() if message.content else ""
                 raw = raw.replace("```json", "").replace("```", "").strip()
                 # Find the JSON object boundaries
                 start = raw.find("{")
