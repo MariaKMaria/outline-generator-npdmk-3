@@ -246,31 +246,10 @@ with st.sidebar:
     st.markdown('<div class="npd-section-label">Clients</div>', unsafe_allow_html=True)
     for name in list(st.session_state.clients.keys()):
         c = st.session_state.clients[name]
-        with st.expander(f"**{name}** · {c['industry']}"):
-            new_brief = st.text_area("Brief", value=c["brief"], height=200, key=f"brief_{name}")
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("Save", key=f"save_{name}"):
-                    st.session_state.clients[name]["brief"] = new_brief
-                    st.success("Saved!")
-            with col2:
-                if st.button("Delete", key=f"del_{name}"):
-                    del st.session_state.clients[name]
-                    st.rerun()
-
-    st.markdown("---")
-    st.markdown("#### Add client")
-    with st.expander("+ New client"):
-        new_name = st.text_input("Name", key="new_name")
-        new_industry = st.text_input("Industry", key="new_industry")
-        new_brief = st.text_area("Brief & guidelines", height=150, key="new_brief")
-        if st.button("Add client"):
-            if new_name and new_brief:
-                st.session_state.clients[new_name] = {"industry": new_industry, "brief": new_brief}
-                st.success(f"Added {new_name}!")
-                st.rerun()
-            else:
-                st.warning("Name and brief required.")
+        st.markdown(f'''<div style="padding:8px 4px;border-bottom:1px solid #2A2825;">
+  <div style="font-size:13px;font-weight:600;color:#F0EDE8;">{name}</div>
+  <div style="font-size:11px;color:#6B6760;">{c["industry"]}</div>
+</div>''', unsafe_allow_html=True)
 
     st.markdown("---")
     # Only show admin section to the admin user - use actual Google auth email
@@ -283,6 +262,8 @@ with st.sidebar:
     except:
         auth_email = st.session_state.get("user_email", "").lower().strip()
     is_admin = bool(admin_email) and auth_email == admin_email
+
+
 
     if is_admin:
     
@@ -513,8 +494,9 @@ if not st.session_state.oversight_confirmed:
     By generating this outline, you confirm that you will:<br>
     &nbsp;&nbsp;• Review all AI-generated content before sharing with clients or writers<br>
     &nbsp;&nbsp;• Verify that all suggested links, statistics, and claims are accurate<br>
+    &nbsp;&nbsp;• Review internal and external links for accuracy and/or add them if necessary<br>
     &nbsp;&nbsp;• Edit the outline to reflect the client's current strategy and brand voice<br>
-    &nbsp;&nbsp;• Take full accountability for the final output delivered to the client
+    &nbsp;&nbsp;• Take full accountability for the final output delivered to the client and/or copywriter
   </div>
 </div>''', unsafe_allow_html=True)
     oversight_check = st.checkbox("I understand and commit to reviewing this outline before sharing it", key="oversight_check")
