@@ -204,6 +204,8 @@ if "client_examples" not in st.session_state:
     st.session_state.client_examples = {}
 if "show_admin_log" not in st.session_state:
     st.session_state.show_admin_log = False
+if "oversight_confirmed" not in st.session_state:
+    st.session_state.oversight_confirmed = False
 
 # ── Sidebar ──────────────────────────────────────────────────────────────────
 # ── Name gate ───────────────────────────────────────────────────────────────
@@ -410,7 +412,13 @@ if st.session_state.get("show_admin_log"):
 # ── Main ─────────────────────────────────────────────────────────────────────
 st.markdown('<div class="npd-tag">SEO + GEO</div>', unsafe_allow_html=True)
 st.markdown('<div style="color:#1A1916;font-weight:700;font-size:22px;font-family:sans-serif;margin-bottom:8px;">Blog Outline Generator</div>', unsafe_allow_html=True)
-st.markdown('<p style="color:#6B6760;font-size:14px;margin-top:-8px;margin-bottom:24px;">Select a client, enter a topic and keyword — Claude handles the rest.</p>', unsafe_allow_html=True)
+st.markdown('<p style="color:#6B6760;font-size:14px;margin-top:-8px;margin-bottom:16px;">Select a client, enter a topic and keyword — Claude handles the rest.</p>', unsafe_allow_html=True)
+
+# ── Human oversight banner ───────────────────────────────────────────────────
+st.markdown('''<div style="background:#FBF0EB;border:1px solid #F0CEBD;border-left:4px solid #E36C09;border-radius:6px;padding:10px 16px;margin-bottom:24px;display:flex;align-items:center;gap:10px;">
+  <span style="font-size:16px;">⚠️</span>
+  <span style="font-size:13px;color:#A83F12;"><strong>Human oversight required.</strong> All AI-generated outlines must be reviewed and edited by a qualified team member before sharing with clients or writers.</span>
+</div>''', unsafe_allow_html=True)
 
 col1, col2 = st.columns([1, 2])
 
@@ -496,7 +504,27 @@ if selected_client != "— no client —":
     st.markdown(f'''<div class="npd-client-badge">📋 <strong>{selected_client}</strong> brief loaded — {client["brief"][:180]}...</div>''', unsafe_allow_html=True)
 
 st.markdown("")
-generate_btn = st.button("⚡ Generate Outline + Create Google Doc")
+
+# ── Per-generation oversight confirmation ────────────────────────────────────
+if not st.session_state.oversight_confirmed:
+    st.markdown('''<div style="background:#FFF8F5;border:1px solid #F0CEBD;border-radius:8px;padding:16px 20px;margin-bottom:12px;">
+  <div style="font-size:14px;font-weight:600;color:#1A1916;margin-bottom:8px;">⚠️ Before you generate</div>
+  <div style="font-size:13px;color:#4A4740;line-height:1.6;margin-bottom:12px;">
+    By generating this outline, you confirm that you will:<br>
+    &nbsp;&nbsp;• Review all AI-generated content before sharing with clients or writers<br>
+    &nbsp;&nbsp;• Verify that all suggested links, statistics, and claims are accurate<br>
+    &nbsp;&nbsp;• Edit the outline to reflect the client's current strategy and brand voice<br>
+    &nbsp;&nbsp;• Take full accountability for the final output delivered to the client
+  </div>
+</div>''', unsafe_allow_html=True)
+    oversight_check = st.checkbox("I understand and commit to reviewing this outline before sharing it", key="oversight_check")
+    generate_btn = st.button("⚡ Generate Outline + Create Google Doc", disabled=not oversight_check)
+    if oversight_check and generate_btn:
+        st.session_state.oversight_confirmed = True
+else:
+    generate_btn = st.button("⚡ Generate Outline + Create Google Doc")
+    # Reset confirmation after each generation so it reappears next time
+    st.session_state.oversight_confirmed = False
 
 # ── Generation ───────────────────────────────────────────────────────────────
 def build_prompt(topic, main_kw, notes, client_name, client, content_type="Blog post", example_text=None):
