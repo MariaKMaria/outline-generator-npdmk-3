@@ -650,10 +650,15 @@ def build_doc_sections(outline):
             add("bold", "GEO/SEO element:")
             add("normal", geo)
 
-        if sec.get("internalLinks"):
-            add("bold", "Internal links:")
-            for l in (sec["internalLinks"] or []):
+        add("bold", "Internal links:")
+        int_links = [l for l in (sec.get("internalLinks") or []) if l and l.strip()]
+        if int_links:
+            for l in int_links:
                 add("bullet", l)
+            add("bullet", "")
+        else:
+            add("bullet", "")
+            add("bullet", "")
 
         add("bold", "External links:")
         ext_links = [l for l in (sec.get("externalLinks") or []) if l and l.strip()]
@@ -716,8 +721,8 @@ if generate_btn:
                 message = anthropic_client.messages.create(
                     model="claude-haiku-4-5-20251001",
                     max_tokens=10000,
-                    system="You are an expert SEO/GEO content strategist. You have access to web search — use it to find real current PAA questions, top-ranking URLs, and SERP features for the given keyword before building the outline. Then respond ONLY with valid JSON. No markdown, no backticks, no explanation before or after. Keep ALL string values under 80 chars. Arrays max 5 items. You MUST close all JSON braces and brackets — incomplete JSON is not acceptable.",
-                    tools=[{"type": "web_search_20250305", "name": "web_search"}],
+                    system="You are an expert SEO/GEO content strategist. You have access to web search — use it ONCE to search for the main keyword to find real PAA questions, top-ranking competitor URLs, and SERP features. Do NOT search per section — one search only. Then respond ONLY with valid JSON. No markdown, no backticks, no explanation before or after. Keep ALL string values under 80 chars. Arrays max 5 items. You MUST close all JSON braces and brackets — incomplete JSON is not acceptable.",
+                    tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": 3}],
                     messages=[{"role": "user", "content": build_prompt(topic, main_kw, notes, client_name, client, content_type, example_text if "example_text" in dir() else None)}]
                 )
                 # Extract text from response — may contain tool_use blocks before final text
