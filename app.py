@@ -527,7 +527,7 @@ Rules:
 - Schulich: 6-8 H2s, 1200-1500 words, Key Takeaways after intro, academic external links, CTA to specific program
 - All: 3 questions per section, 3 specific content suggestions, GEO elements only where valuable
 - Keep all string values SHORT (under 100 chars each)
-- EXTERNAL LINKS: Use web search to find 1-2 real, working URLs per section that are credible and directly relevant to that section's topic. Only include URLs you have verified exist and are fully publicly accessible — NO login walls, NO registration gates, NO paywalled content, NO subscription-required pages. Client-specific rules: Mitsubishi — no competitor automaker sites; Schulich — prefer McKinsey, ScienceDirect, APA, Frontiers, government or academic sources only — NO other business schools, NO HBR; Tangerine — absolutely no banks, credit unions, digital financial institutions, investment platforms, or fintech competitors of any kind (this includes but is not limited to Wealthsimple, RBC, TD, BMO, Scotiabank, CIBC, National Bank, EQ Bank, Neo Financial, Questrade, or any similar institution) — credible sources only such as government sites (canada.ca, cra-arc.gc.ca), academic, or established non-profit financial literacy organizations; All clients — no forums, no social media.
+- EXTERNAL LINKS: Use web search to find 1-2 real, working URLs per section that are credible and directly relevant to that section's topic. Only include URLs you have verified exist and are fully publicly accessible — NO login walls, NO registration gates, NO paywalled content, NO subscription-required pages. NEVER use Wikipedia or any Wikimedia site for any client. Client-specific rules: Mitsubishi — NO other automotive OEMs or car brands of any kind, and NO Mitsubishi Motors websites from other countries or regions (e.g. mitsubishi-motors.com.au, mitsubishi-motors.co.uk, etc.) — only mitsubishi-motors.ca is acceptable as an internal link; Schulich — prefer McKinsey, ScienceDirect, APA, Frontiers, government or academic sources only — NO other business schools, NO HBR; Tangerine — absolutely no banks, credit unions, digital financial institutions, investment platforms, or fintech competitors of any kind (this includes but is not limited to Wealthsimple, RBC, TD, BMO, Scotiabank, CIBC, National Bank, EQ Bank, Neo Financial, Questrade, or any similar institution) — credible sources only such as government sites (canada.ca, cra-arc.gc.ca), academic, or established non-profit financial literacy organizations; All clients — no forums, no social media.
 - INTERNAL LINKS: Leave as empty strings — the reviewer will add these manually
 
 Return ONLY this JSON:
@@ -587,6 +587,8 @@ def build_doc_sections(outline):
     def add(t, text, label=None, value=None):
         if t == "label_value":
             sections.append({"type": t, "label": str(label or ""), "value": str(value or ""), "text": ""})
+        elif t == "bullet_link":
+            sections.append({"type": "bullet_link", "text": str(text or "")})
         else:
             sections.append({"type": t, "text": str(text or "")})
 
@@ -657,7 +659,7 @@ def build_doc_sections(outline):
         ext_links = [l for l in (sec.get("externalLinks") or []) if l and l.strip()]
         if ext_links:
             for l in ext_links:
-                add("bullet", l)
+                add("bullet_link", l)
             # Add one blank bullet for any additional links reviewer wants to add
             add("bullet", "")
         else:
