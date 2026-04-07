@@ -251,7 +251,6 @@ with st.sidebar:
   <div style="font-size:11px;color:#6B6760;">{c["industry"]}</div>
 </div>''', unsafe_allow_html=True)
 
-    st.markdown("---")
     # Only show admin section to the admin user - use actual Google auth email
     try:
         admin_email = st.secrets["ADMIN_EMAIL"].lower().strip()
@@ -267,7 +266,6 @@ with st.sidebar:
 
 
 
-    st.markdown("---")
     st.markdown(f'<div style="font-size:11px;color:#6B6760;padding:4px 0;">Logged in as <strong style="color:#9E9A94;">{st.session_state.user_name}</strong></div>', unsafe_allow_html=True)
     st.markdown(f'<div style="font-size:11px;color:#6B6760;padding:2px 0;">{st.session_state.get("user_email","")}</div>', unsafe_allow_html=True)
     if st.button("Sign out", key="signout"):
