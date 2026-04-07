@@ -265,11 +265,7 @@ with st.sidebar:
 
 
 
-    if is_admin:
-    
-        log = st.session_state.usage_log
-        if st.button(f"📊 View usage log ({len(log)} entries)", key="open_log"):
-            st.session_state.show_admin_log = True
+
 
     st.markdown("---")
     st.markdown(f'<div style="font-size:11px;color:#6B6760;padding:4px 0;">Logged in as <strong style="color:#9E9A94;">{st.session_state.user_name}</strong></div>', unsafe_allow_html=True)
