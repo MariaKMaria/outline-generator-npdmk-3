@@ -481,8 +481,8 @@ if selected_client != "— no client —":
 st.markdown("")
 
 # ── Per-generation oversight confirmation ────────────────────────────────────
-if not st.session_state.oversight_confirmed:
-    st.markdown('''<div style="background:#FFF8F5;border:1px solid #F0CEBD;border-radius:8px;padding:16px 20px;margin-bottom:12px;">
+# Oversight box — always visible, checkbox required every time
+st.markdown('''<div style="background:#FFF8F5;border:1px solid #F0CEBD;border-radius:8px;padding:16px 20px;margin-bottom:12px;">
   <div style="font-size:14px;font-weight:600;color:#1A1916;margin-bottom:8px;">⚠️ Before you generate</div>
   <div style="font-size:13px;color:#4A4740;line-height:1.6;margin-bottom:12px;">
     By generating this outline, you confirm that you will:<br>
@@ -493,14 +493,29 @@ if not st.session_state.oversight_confirmed:
     &nbsp;&nbsp;• Take full accountability for the final output delivered to the client and/or copywriter
   </div>
 </div>''', unsafe_allow_html=True)
-    oversight_check = st.checkbox("I understand and commit to reviewing this outline before sharing it", key="oversight_check")
-    generate_btn = st.button("⚡ Generate Outline + Create Google Doc", disabled=not oversight_check)
-    if oversight_check and generate_btn:
-        st.session_state.oversight_confirmed = True
-else:
-    generate_btn = st.button("⚡ Generate Outline + Create Google Doc")
-    # Reset confirmation after each generation so it reappears next time
-    st.session_state.oversight_confirmed = False
+oversight_check = st.checkbox("I understand and commit to reviewing this outline before sharing it", key="oversight_check")
+
+# All fields required — disable button if any missing
+fields_complete = (
+    bool(topic.strip()) and
+    bool(main_kw.strip()) and
+    selected_client != "— no client —" and
+    content_type != "— select —" and
+    oversight_check
+)
+generate_btn = st.button("⚡ Generate Outline + Create Google Doc", disabled=not fields_complete)
+
+# Show inline hints for missing required fields
+if not topic.strip():
+    st.caption("⚠️ Topic / working title is required.")
+if not main_kw.strip():
+    st.caption("⚠️ Target keyword is required.")
+if selected_client == "— no client —":
+    st.caption("⚠️ Please select a client.")
+if content_type == "— select —":
+    st.caption("⚠️ Please select a content type.")
+if not oversight_check:
+    st.caption("⚠️ Please confirm the oversight commitment above.")
 
 # ── Generation ───────────────────────────────────────────────────────────────
 def build_prompt(topic, main_kw, notes, client_name, client, content_type="Blog post", example_text=None):
@@ -698,12 +713,8 @@ def push_to_docs(script_url, title, sections, client_name="", log_data=None):
 
 
 if generate_btn:
-    if not topic:
-        st.error("Please enter a topic.")
-    elif not main_kw:
-        st.error("Please enter a target keyword.")
-    elif content_type == "— select —":
-        st.error("Please select a content type.")
+    if not topic or not main_kw or selected_client == "— no client —" or content_type == "— select —" or not oversight_check:
+        st.error("Please complete all required fields and confirm the oversight commitment.")
     else:
         try:
             api_key = st.secrets["ANTHROPIC_API_KEY"]
