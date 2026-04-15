@@ -180,6 +180,25 @@ TONE: Positive and confidence-building. Do not reference or reflect negative onl
 KEY NARRATIVE: No branches and a streamlined product lineup are features, not drawbacks — especially for first-time investors who benefit from simplicity, clarity, and a low-stress banking experience. Position Tangerine as a smart, modern choice that removes friction and gives peace of mind.
 
 SECTION DEPTH GUIDANCE: Assess each H2 section by search intent alignment, featured snippet/PAA potential, and proximity to conversion. High-priority sections (typically 2-3 per outline) should have 4-5 detailed content suggestions with specific angles, stats, or Canadian examples to include. Standard sections get 3 suggestions. Supporting or context sections get 2 concise suggestions."""
+    },
+    "Source Office Furniture": {
+        "industry": "Office Furniture Retail — Canada",
+        "brief": """Canada's largest independent office furniture retailer. 13+ locations across Canada.
+URL: https://www.sourceofficefurniture.ca/
+
+TONE: Practical, warm, direct, Canadian spelling. Knowledgeable friend tone, not salesy. Light personality welcome, never at expense of clarity.
+
+CONTENT: 1,200-2,000 words. Max 2-para intro. Right to win: office furniture selection, space planning, ergonomics, vertical-specific furniture (education, corporate, healthcare). Deprioritize: software tools, HR practices, async communication, non-physical-space content.
+
+STRUCTURE: Intro (2 para max) → Core furniture/space content (most depth) → How-to/tips as steps or checklist → FAQ (optional, use schema) → CTA.
+
+GEO/SEO: TOFU educational. Target PAA in H2/H3 or FAQ. Frame tips as How-to. Short keyword-led URL slugs.
+
+CTA: Warm, action-oriented. Link to /shop and /locations. Lead with benefit, reference in-store expertise. No generic contact us.
+
+EXTERNAL LINKS: Credible only. No competitors (Atwork, MotionGrey, Branch, Effy). No Wikipedia, no login-walled pages.
+
+SECTION DEPTH: High-priority sections (2-3 per outline): 4-5 detailed suggestions with angles/examples. Standard: 3. Supporting: 2 concise."""
     }
 }
 
